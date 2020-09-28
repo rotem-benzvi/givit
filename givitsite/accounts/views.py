@@ -19,13 +19,11 @@ def register(request):
             profile.save()
 
             user_login = authenticate(
-                username=user_form.cleaned_data['username'], password=user_form.cleaned_data['password1'])
+                username=user_form.cleaned_data['username'],
+                password=user_form.cleaned_data['password1'])
             autologin(request, user_login)
 
-            try:
-                user_profile = Profile.objects.get(user=user)
-            except Profile.DoesNotExist:
-                user_profile = None
+            user_profile = get_user_profile_data(request.user)
             return render(request, 'home.html', {'user_profile': user_profile})
     else:
         user_form = RegistrationForm()
@@ -43,10 +41,7 @@ def login(request):
 
         if user is not None:
             auth.login(request, user)
-            try:
-                user_profile = Profile.objects.get(user=user)
-            except Profile.DoesNotExist:
-                user_profile = None
+            user_profile = get_user_profile_data(user)
             return render(request, 'home.html', {'user_profile': user_profile})
         else:
             messages.info(request, 'username OR password is incorrect')
@@ -57,4 +52,13 @@ def login(request):
 
 def logout(request):
     auth.logout(request)
-    return redirect('/')
+    user_profile = get_user_profile_data(None)
+    return render(request, 'home.html', {'user_profile': user_profile})
+
+
+def get_user_profile_data(user):
+    try:
+        user_profile = Profile.objects.get(user=user)
+    except Exception:
+        user_profile = None
+    return user_profile
