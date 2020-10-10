@@ -2,6 +2,7 @@ name: bootstrap workflow
 
 on:
   pull_request:
+    types: [ opened, closed ]
     branches: [ master ]
   push:
     branches: [ master ]
